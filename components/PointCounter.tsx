@@ -1,5 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ImageBackground, ImageSourcePropType } from 'react-native';
+import * as Haptics from 'expo-haptics';
+
+const { width } = Dimensions.get('window');
 
 interface PointCounterProps {
   value: number;
@@ -7,6 +10,30 @@ interface PointCounterProps {
   onDecrement: () => void;
   flipped?: boolean;
   onBackgroundPress: () => void;
+  backgroundColor: string;
+  backgroundImage?: ImageSourcePropType;
+}
+
+// Component for outlined text effect
+function OutlinedText({ value }: { value: number }) {
+  const text = String(value);
+  const outlineWidth = 4;
+
+  return (
+    <View style={styles.outlinedTextContainer}>
+      {/* Black outline layers */}
+      <Text style={[styles.valueText, styles.outline, { top: -outlineWidth }]}>{text}</Text>
+      <Text style={[styles.valueText, styles.outline, { top: outlineWidth }]}>{text}</Text>
+      <Text style={[styles.valueText, styles.outline, { left: -outlineWidth }]}>{text}</Text>
+      <Text style={[styles.valueText, styles.outline, { left: outlineWidth }]}>{text}</Text>
+      <Text style={[styles.valueText, styles.outline, { top: -outlineWidth, left: -outlineWidth }]}>{text}</Text>
+      <Text style={[styles.valueText, styles.outline, { top: -outlineWidth, left: outlineWidth }]}>{text}</Text>
+      <Text style={[styles.valueText, styles.outline, { top: outlineWidth, left: -outlineWidth }]}>{text}</Text>
+      <Text style={[styles.valueText, styles.outline, { top: outlineWidth, left: outlineWidth }]}>{text}</Text>
+      {/* White text on top */}
+      <Text style={[styles.valueText, styles.mainText]}>{text}</Text>
+    </View>
+  );
 }
 
 export function PointCounter({
@@ -15,31 +42,77 @@ export function PointCounter({
   onDecrement,
   flipped = false,
   onBackgroundPress,
+  backgroundColor,
+  backgroundImage,
 }: PointCounterProps) {
+  const handleIncrement = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onIncrement();
+  };
+
+  const handleDecrement = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onDecrement();
+  };
+
+  const content = (
+    <>
+      {/* Up arrow (increment) at top */}
+      <TouchableOpacity
+        style={styles.arrowButton}
+        onPress={handleIncrement}
+        activeOpacity={0.8}
+      >
+        <View style={styles.arrowPill}>
+          <Text style={styles.arrowText}>+</Text>
+        </View>
+      </TouchableOpacity>
+
+      {/* Score in the middle - white text with black outline */}
+      <View style={styles.scoreContainer}>
+        <OutlinedText value={value} />
+      </View>
+
+      {/* Down arrow (decrement) at bottom */}
+      <TouchableOpacity
+        style={styles.arrowButton}
+        onPress={handleDecrement}
+        activeOpacity={0.8}
+      >
+        <View style={styles.arrowPill}>
+          <Text style={styles.arrowText}>−</Text>
+        </View>
+      </TouchableOpacity>
+    </>
+  );
+
+  if (backgroundImage) {
+    return (
+      <TouchableOpacity
+        style={[styles.container, flipped && styles.flipped]}
+        onPress={onBackgroundPress}
+        activeOpacity={1}
+      >
+        <ImageBackground
+          source={backgroundImage}
+          style={[styles.imageBackground, { backgroundColor }]}
+          imageStyle={styles.imageStyle}
+          resizeMode="cover"
+        >
+          {content}
+        </ImageBackground>
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <TouchableOpacity
-      style={[styles.container, flipped && styles.flipped]}
+      style={[styles.container, { backgroundColor }, flipped && styles.flipped]}
       onPress={onBackgroundPress}
       activeOpacity={1}
     >
-      <View style={styles.counterRow}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={onDecrement}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.buttonText}>−</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.valueText}>{value.toString().padStart(2, '0')}</Text>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={onIncrement}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.buttonText}>+</Text>
-        </TouchableOpacity>
+      <View style={styles.contentWrapper}>
+        {content}
       </View>
     </TouchableOpacity>
   );
@@ -48,38 +121,60 @@ export function PointCounter({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  contentWrapper: {
+    flex: 1,
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 40,
+  },
+  imageBackground: {
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  imageStyle: {
+    opacity: 0.95,
   },
   flipped: {
     transform: [{ rotate: '180deg' }],
   },
-  counterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 30,
+  arrowButton: {
+    padding: 8,
   },
-  button: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  arrowPill: {
+    width: width * 0.5,
+    height: 56,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+    borderRadius: 28,
+  },
+  arrowText: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  scoreContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  buttonText: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#fff',
+  outlinedTextContainer: {
+    position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   valueText: {
-    fontSize: 120,
-    fontWeight: 'bold',
+    fontSize: 140,
+    fontWeight: '900',
+    includeFontPadding: false,
+  },
+  outline: {
+    position: 'absolute',
+    color: '#000',
+  },
+  mainText: {
     color: '#fff',
-    minWidth: 180,
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
   },
 });

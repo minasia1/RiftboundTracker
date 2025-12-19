@@ -1,3 +1,4 @@
+- In all interaction and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
 # Riftbound Point Tracker
 
 ## Project Overview
@@ -25,3 +26,6 @@ React Native (Expo) app for tracking points in the Riftbound card game. Features
 - 12 Riftbound champions from Origins set
 - Each player side can select their own champion background
 - Reset button to zero both counters
+
+## Plans
+- At the end of each plan, give me a list of unresolved questions to answer, if any. Make the questions extremely concise. Sacrifice grammar for the sake of concision. 

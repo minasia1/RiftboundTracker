@@ -55,13 +55,15 @@ export default function App() {
       <StatusBar style="light" />
 
       {/* Top player (rotated 180°) */}
-      <View style={[styles.playerSection, { backgroundColor: topChampion.color }]}>
+      <View style={styles.playerSection}>
         <PointCounter
           value={topScore}
           onIncrement={() => handleIncrement('top')}
           onDecrement={() => handleDecrement('top')}
           flipped
           onBackgroundPress={() => handleBackgroundPress('top')}
+          backgroundColor={topChampion.color}
+          backgroundImage={topChampion.image}
         />
       </View>
 
@@ -71,12 +73,14 @@ export default function App() {
       </View>
 
       {/* Bottom player */}
-      <View style={[styles.playerSection, { backgroundColor: bottomChampion.color }]}>
+      <View style={styles.playerSection}>
         <PointCounter
           value={bottomScore}
           onIncrement={() => handleIncrement('bottom')}
           onDecrement={() => handleDecrement('bottom')}
           onBackgroundPress={() => handleBackgroundPress('bottom')}
+          backgroundColor={bottomChampion.color}
+          backgroundImage={bottomChampion.image}
         />
       </View>
 
@@ -100,9 +104,13 @@ const styles = StyleSheet.create({
   },
   resetContainer: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -20 }],
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'box-none',
     zIndex: 10,
   },
 });
