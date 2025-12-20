@@ -1,37 +1,56 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ImageBackground, ImageSourcePropType } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Pressable, StyleSheet, ImageBackground, ImageSourcePropType } from 'react-native';
 import * as Haptics from 'expo-haptics';
-
-const { width } = Dimensions.get('window');
+import Svg, { Text as SvgText } from 'react-native-svg';
 
 interface PointCounterProps {
   value: number;
   onIncrement: () => void;
   onDecrement: () => void;
   flipped?: boolean;
-  onBackgroundPress: () => void;
   backgroundColor: string;
   backgroundImage?: ImageSourcePropType;
 }
 
-// Component for outlined text effect
+// Component for outlined text with transparent fill using SVG
 function OutlinedText({ value }: { value: number }) {
   const text = String(value);
-  const outlineWidth = 4;
+  const fontSize = 140;
+  const strokeWidth = 6;
+  // Width needs to accommodate 1 or 2 digits properly
+  const svgWidth = text.length === 1 ? 120 : 200;
 
   return (
     <View style={styles.outlinedTextContainer}>
-      {/* Black outline layers */}
-      <Text style={[styles.valueText, styles.outline, { top: -outlineWidth }]}>{text}</Text>
-      <Text style={[styles.valueText, styles.outline, { top: outlineWidth }]}>{text}</Text>
-      <Text style={[styles.valueText, styles.outline, { left: -outlineWidth }]}>{text}</Text>
-      <Text style={[styles.valueText, styles.outline, { left: outlineWidth }]}>{text}</Text>
-      <Text style={[styles.valueText, styles.outline, { top: -outlineWidth, left: -outlineWidth }]}>{text}</Text>
-      <Text style={[styles.valueText, styles.outline, { top: -outlineWidth, left: outlineWidth }]}>{text}</Text>
-      <Text style={[styles.valueText, styles.outline, { top: outlineWidth, left: -outlineWidth }]}>{text}</Text>
-      <Text style={[styles.valueText, styles.outline, { top: outlineWidth, left: outlineWidth }]}>{text}</Text>
-      {/* White text on top */}
-      <Text style={[styles.valueText, styles.mainText]}>{text}</Text>
+      <Svg height={fontSize + 20} width={svgWidth}>
+        {/* Stroke layer - drawn first, behind */}
+        <SvgText
+          x="50%"
+          y={fontSize}
+          textAnchor="middle"
+          fontSize={fontSize}
+          fontWeight="900"
+          fill="none"
+          stroke="#000"
+          strokeWidth={strokeWidth * 2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        >
+          {text}
+        </SvgText>
+        {/* Fill layer - drawn on top */}
+        <SvgText
+          x="50%"
+          y={fontSize}
+          textAnchor="middle"
+          fontSize={fontSize}
+          fontWeight="900"
+          fill="rgba(255, 255, 255, .9)"
+          stroke="none"
+        >
+          {text}
+        </SvgText>
+      </Svg>
     </View>
   );
 }
@@ -41,10 +60,12 @@ export function PointCounter({
   onIncrement,
   onDecrement,
   flipped = false,
-  onBackgroundPress,
   backgroundColor,
   backgroundImage,
 }: PointCounterProps) {
+  const [topPressed, setTopPressed] = useState(false);
+  const [bottomPressed, setBottomPressed] = useState(false);
+
   const handleIncrement = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onIncrement();
@@ -57,42 +78,42 @@ export function PointCounter({
 
   const content = (
     <>
-      {/* Up arrow (increment) at top */}
-      <TouchableOpacity
-        style={styles.arrowButton}
+      {/* Top tap zone (increment) */}
+      <Pressable
+        style={[styles.tapZone, topPressed && styles.tapZonePressed]}
         onPress={handleIncrement}
-        activeOpacity={0.8}
+        onPressIn={() => setTopPressed(true)}
+        onPressOut={() => setTopPressed(false)}
       >
-        <View style={styles.arrowPill}>
-          <Text style={styles.arrowText}>+</Text>
+        <View style={[styles.arrowIndicator, topPressed && styles.arrowIndicatorPressed]}>
+          <Text style={[styles.arrowText, topPressed && styles.arrowTextPressed]}>▲</Text>
         </View>
-      </TouchableOpacity>
+        {topPressed && <View style={styles.pressOverlay} />}
+      </Pressable>
 
-      {/* Score in the middle - white text with black outline */}
+      {/* Score in the middle */}
       <View style={styles.scoreContainer}>
         <OutlinedText value={value} />
       </View>
 
-      {/* Down arrow (decrement) at bottom */}
-      <TouchableOpacity
-        style={styles.arrowButton}
+      {/* Bottom tap zone (decrement) */}
+      <Pressable
+        style={[styles.tapZone, bottomPressed && styles.tapZonePressed]}
         onPress={handleDecrement}
-        activeOpacity={0.8}
+        onPressIn={() => setBottomPressed(true)}
+        onPressOut={() => setBottomPressed(false)}
       >
-        <View style={styles.arrowPill}>
-          <Text style={styles.arrowText}>−</Text>
+        <View style={[styles.arrowIndicator, bottomPressed && styles.arrowIndicatorPressed]}>
+          <Text style={[styles.arrowText, bottomPressed && styles.arrowTextPressed]}>▼</Text>
         </View>
-      </TouchableOpacity>
+        {bottomPressed && <View style={styles.pressOverlay} />}
+      </Pressable>
     </>
   );
 
   if (backgroundImage) {
     return (
-      <TouchableOpacity
-        style={[styles.container, flipped && styles.flipped]}
-        onPress={onBackgroundPress}
-        activeOpacity={1}
-      >
+      <View style={[styles.container, flipped && styles.flipped]}>
         <ImageBackground
           source={backgroundImage}
           style={[styles.imageBackground, { backgroundColor }]}
@@ -101,20 +122,16 @@ export function PointCounter({
         >
           {content}
         </ImageBackground>
-      </TouchableOpacity>
+      </View>
     );
   }
 
   return (
-    <TouchableOpacity
-      style={[styles.container, { backgroundColor }, flipped && styles.flipped]}
-      onPress={onBackgroundPress}
-      activeOpacity={1}
-    >
+    <View style={[styles.container, { backgroundColor }, flipped && styles.flipped]}>
       <View style={styles.contentWrapper}>
         {content}
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -126,55 +143,63 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 40,
   },
   imageBackground: {
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 40,
   },
   imageStyle: {
-    opacity: 0.95,
+    opacity: 1
   },
   flipped: {
     transform: [{ rotate: '180deg' }],
   },
-  arrowButton: {
-    padding: 8,
-  },
-  arrowPill: {
-    width: width * 0.5,
-    height: 56,
+  tapZone: {
+    width: '100%',
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',
-    borderRadius: 28,
+    position: 'relative',
+  },
+  tapZonePressed: {
+    // Visual feedback when pressed
+  },
+  pressOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 0,
+  },
+  arrowIndicator: {
+    opacity: 0.3,
+    zIndex: 1,
+  },
+  arrowIndicatorPressed: {
+    opacity: 1,
   },
   arrowText: {
     fontSize: 32,
     fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.6)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  arrowTextPressed: {
     color: '#fff',
+    fontSize: 38,
   },
   scoreContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 20,
   },
   outlinedTextContainer: {
-    position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  valueText: {
-    fontSize: 140,
-    fontWeight: '900',
-    includeFontPadding: false,
-  },
-  outline: {
-    position: 'absolute',
-    color: '#000',
-  },
-  mainText: {
-    color: '#fff',
   },
 });

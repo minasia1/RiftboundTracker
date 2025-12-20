@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { PointCounter } from './components/PointCounter';
 import { ChampionPicker } from './components/ChampionPicker';
-import { ResetButton } from './components/ResetButton';
+import { SideMenu } from './components/SideMenu';
 import { Champion, DEFAULT_CHAMPION } from './constants/champions';
 
 type PlayerSide = 'top' | 'bottom';
@@ -37,7 +37,7 @@ export default function App() {
     setBottomScore(0);
   };
 
-  const handleBackgroundPress = (side: PlayerSide) => {
+  const handleChampionPress = (side: PlayerSide) => {
     setActiveSide(side);
     setPickerVisible(true);
   };
@@ -61,15 +61,9 @@ export default function App() {
           onIncrement={() => handleIncrement('top')}
           onDecrement={() => handleDecrement('top')}
           flipped
-          onBackgroundPress={() => handleBackgroundPress('top')}
           backgroundColor={topChampion.color}
           backgroundImage={topChampion.image}
         />
-      </View>
-
-      {/* Reset button in the middle */}
-      <View style={styles.resetContainer}>
-        <ResetButton onPress={handleReset} />
       </View>
 
       {/* Bottom player */}
@@ -78,11 +72,19 @@ export default function App() {
           value={bottomScore}
           onIncrement={() => handleIncrement('bottom')}
           onDecrement={() => handleDecrement('bottom')}
-          onBackgroundPress={() => handleBackgroundPress('bottom')}
           backgroundColor={bottomChampion.color}
           backgroundImage={bottomChampion.image}
         />
       </View>
+
+      {/* Side menu */}
+      <SideMenu
+        onReset={handleReset}
+        onTopChampionPress={() => handleChampionPress('top')}
+        onBottomChampionPress={() => handleChampionPress('bottom')}
+        topChampionName={topChampion.name}
+        bottomChampionName={bottomChampion.name}
+      />
 
       {/* Champion picker modal */}
       <ChampionPicker
@@ -101,16 +103,5 @@ const styles = StyleSheet.create({
   },
   playerSection: {
     flex: 1,
-  },
-  resetContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'box-none',
-    zIndex: 10,
   },
 });
