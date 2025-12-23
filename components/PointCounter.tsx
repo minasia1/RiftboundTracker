@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, ImageBackground, ImageSourcePropType } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, Pressable, StyleSheet, ImageBackground, ImageSourcePropType, TouchableOpacity, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import Svg, { Text as SvgText } from 'react-native-svg';
+import Svg, { Text as SvgText, Circle, Path } from 'react-native-svg';
+import { InlineChampionPicker } from './InlineChampionPicker';
+import { Champion } from '../constants/champions';
 
 interface PointCounterProps {
   value: number;
   onIncrement: () => void;
   onDecrement: () => void;
+  currentChampion: Champion;
+  onChampionChange: (champion: Champion) => void;
   flipped?: boolean;
-  backgroundColor: string;
-  backgroundImage?: ImageSourcePropType;
+}
+
+// Minimalist person icon using SVG
+function PersonIcon() {
+  return (
+    <Svg width={28} height={28} viewBox="0 0 24 24">
+      <Circle cx={12} cy={7} r={4} stroke="#000" strokeWidth={2.5} fill="none" />
+      <Path d="M5 21c0-4.5 3.5-7.5 7-7.5s7 3 7 7.5" stroke="#000" strokeWidth={2.5} fill="none" strokeLinecap="round" />
+    </Svg>
+  );
 }
 
 // Component for outlined text with transparent fill using SVG
@@ -59,12 +71,19 @@ export function PointCounter({
   value,
   onIncrement,
   onDecrement,
+  currentChampion,
+  onChampionChange,
   flipped = false,
-  backgroundColor,
-  backgroundImage,
 }: PointCounterProps) {
   const [topPressed, setTopPressed] = useState(false);
   const [bottomPressed, setBottomPressed] = useState(false);
+  const [showPersonIcon, setShowPersonIcon] = useState(false);
+  const [showChampionPicker, setShowChampionPicker] = useState(false);
+  const iconFadeAnim = useRef(new Animated.Value(0)).current;
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const backgroundColor = currentChampion.color;
+  const backgroundImage = currentChampion.image;
 
   const handleIncrement = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -74,6 +93,43 @@ export function PointCounter({
   const handleDecrement = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onDecrement();
+  };
+
+  const handleBackgroundTap = () => {
+    // Single tap shows the person icon
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowPersonIcon(true);
+    Animated.timing(iconFadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    // Clear any existing timeout
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+
+    // Auto-hide after 3 seconds
+    hideTimeoutRef.current = setTimeout(() => {
+      hidePersonIcon();
+    }, 3000);
+  };
+
+  const hidePersonIcon = () => {
+    Animated.timing(iconFadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setShowPersonIcon(false);
+    });
+  };
+
+  const handlePersonIconPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    hidePersonIcon();
+    setShowChampionPicker(true);
   };
 
   const content = (
@@ -91,10 +147,10 @@ export function PointCounter({
         {topPressed && <View style={styles.pressOverlay} />}
       </Pressable>
 
-      {/* Score in the middle */}
-      <View style={styles.scoreContainer}>
+      {/* Score in the middle - tap to show person icon */}
+      <Pressable style={styles.scoreContainer} onPress={handleBackgroundTap}>
         <OutlinedText value={value} />
-      </View>
+      </Pressable>
 
       {/* Bottom tap zone (decrement) */}
       <Pressable
@@ -108,6 +164,19 @@ export function PointCounter({
         </View>
         {bottomPressed && <View style={styles.pressOverlay} />}
       </Pressable>
+
+      {/* Person icon on right side */}
+      {showPersonIcon && (
+        <Animated.View style={[styles.personIconContainer, { opacity: iconFadeAnim }]}>
+          <TouchableOpacity
+            style={styles.personIconButton}
+            onPress={handlePersonIconPress}
+            activeOpacity={0.8}
+          >
+            <PersonIcon />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
     </>
   );
 
@@ -122,6 +191,13 @@ export function PointCounter({
         >
           {content}
         </ImageBackground>
+        {showChampionPicker && (
+          <InlineChampionPicker
+            currentChampion={currentChampion}
+            onSelect={onChampionChange}
+            onClose={() => setShowChampionPicker(false)}
+          />
+        )}
       </View>
     );
   }
@@ -131,6 +207,13 @@ export function PointCounter({
       <View style={styles.contentWrapper}>
         {content}
       </View>
+      {showChampionPicker && (
+        <InlineChampionPicker
+          currentChampion={currentChampion}
+          onSelect={onChampionChange}
+          onClose={() => setShowChampionPicker(false)}
+        />
+      )}
     </View>
   );
 }
@@ -194,6 +277,7 @@ const styles = StyleSheet.create({
     fontSize: 38,
   },
   scoreContainer: {
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
@@ -201,5 +285,22 @@ const styles = StyleSheet.create({
   outlinedTextContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  personIconContainer: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    marginTop: -25,
+    zIndex: 10,
+  },
+  personIconButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#FFF9E6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#000',
   },
 });

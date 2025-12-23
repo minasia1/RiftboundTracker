@@ -4,7 +4,7 @@ import App from '../App';
 import { PointCounter } from '../components/PointCounter';
 import { ChampionPicker } from '../components/ChampionPicker';
 import { ResetButton } from '../components/ResetButton';
-import { CHAMPIONS } from '../constants/champions';
+import { CHAMPIONS, DEFAULT_CHAMPION } from '../constants/champions';
 
 // Mock expo-haptics
 jest.mock('expo-haptics', () => ({
@@ -39,8 +39,8 @@ describe('UX: Point Counter Usability', () => {
     value: 0,
     onIncrement: jest.fn(),
     onDecrement: jest.fn(),
-    onBackgroundPress: jest.fn(),
-    backgroundColor: '#9B59B6',
+    currentChampion: DEFAULT_CHAMPION,
+    onChampionChange: jest.fn(),
   };
 
   beforeEach(() => {

@@ -11,9 +11,9 @@ export interface Champion {
 // Gen-Z aesthetic colors - bold pastels and vibrant tones
 export const CHAMPIONS: Champion[] = [
   { id: 'kaisa', name: "Kai'Sa", title: 'Daughter of the Void', color: '#B8A9E8', image: require('../assets/champions/kaisa.png') }, // Soft lavender
-  { id: 'volibear', name: 'Volibear', title: 'Relentless Storm', color: '#7EC8E3' }, // Sky blue
-  { id: 'jinx', name: 'Jinx', title: 'Loose Cannon', color: '#FF8FAB' }, // Bubblegum pink
-  { id: 'darius', name: 'Darius', title: 'Hand of Noxus', color: '#E85D75' }, // Bold coral
+  { id: 'volibear', name: 'Volibear', title: 'Relentless Storm', color: '#7EC8E3', image: require('../assets/champions/volibear.png') }, // Sky blue
+  { id: 'jinx', name: 'Jinx', title: 'Loose Cannon', color: '#FF8FAB', image: require('../assets/champions/jinx.png') }, // Bubblegum pink
+  { id: 'darius', name: 'Darius', title: 'Hand of Noxus', color: '#E85D75', image: require('../assets/champions/darius.png') }, // Bold coral
   { id: 'ahri', name: 'Ahri', title: 'Nine-Tailed Fox', color: '#FFB5C5', image: require('../assets/champions/ahri.png') }, // Soft rose
   { id: 'leesin', name: 'Lee Sin', title: 'Blind Monk', color: '#FFB347' }, // Warm orange
   { id: 'yasuo', name: 'Yasuo', title: 'Unforgiven', color: '#6B8E8E' }, // Sage teal

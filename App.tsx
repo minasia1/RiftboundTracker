@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { PointCounter } from './components/PointCounter';
-import { ChampionPicker } from './components/ChampionPicker';
 import { SideMenu } from './components/SideMenu';
 import { Champion, DEFAULT_CHAMPION } from './constants/champions';
 
@@ -13,8 +12,6 @@ export default function App() {
   const [bottomScore, setBottomScore] = useState(0);
   const [topChampion, setTopChampion] = useState<Champion>(DEFAULT_CHAMPION);
   const [bottomChampion, setBottomChampion] = useState<Champion>(DEFAULT_CHAMPION);
-  const [pickerVisible, setPickerVisible] = useState(false);
-  const [activeSide, setActiveSide] = useState<PlayerSide>('top');
 
   const handleIncrement = (side: PlayerSide) => {
     if (side === 'top') {
@@ -37,19 +34,6 @@ export default function App() {
     setBottomScore(0);
   };
 
-  const handleChampionPress = (side: PlayerSide) => {
-    setActiveSide(side);
-    setPickerVisible(true);
-  };
-
-  const handleChampionSelect = (champion: Champion) => {
-    if (activeSide === 'top') {
-      setTopChampion(champion);
-    } else {
-      setBottomChampion(champion);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -60,9 +44,9 @@ export default function App() {
           value={topScore}
           onIncrement={() => handleIncrement('top')}
           onDecrement={() => handleDecrement('top')}
+          currentChampion={topChampion}
+          onChampionChange={setTopChampion}
           flipped
-          backgroundColor={topChampion.color}
-          backgroundImage={topChampion.image}
         />
       </View>
 
@@ -72,27 +56,13 @@ export default function App() {
           value={bottomScore}
           onIncrement={() => handleIncrement('bottom')}
           onDecrement={() => handleDecrement('bottom')}
-          backgroundColor={bottomChampion.color}
-          backgroundImage={bottomChampion.image}
+          currentChampion={bottomChampion}
+          onChampionChange={setBottomChampion}
         />
       </View>
 
       {/* Side menu */}
-      <SideMenu
-        onReset={handleReset}
-        onTopChampionPress={() => handleChampionPress('top')}
-        onBottomChampionPress={() => handleChampionPress('bottom')}
-        topChampionName={topChampion.name}
-        bottomChampionName={bottomChampion.name}
-      />
-
-      {/* Champion picker modal */}
-      <ChampionPicker
-        visible={pickerVisible}
-        onClose={() => setPickerVisible(false)}
-        onSelect={handleChampionSelect}
-        currentChampion={activeSide === 'top' ? topChampion : bottomChampion}
-      />
+      <SideMenu onReset={handleReset} />
     </View>
   );
 }

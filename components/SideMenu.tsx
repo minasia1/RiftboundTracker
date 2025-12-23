@@ -5,27 +5,17 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  Dimensions,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const MENU_WIDTH = 200;
 
 interface SideMenuProps {
   onReset: () => void;
-  onTopChampionPress: () => void;
-  onBottomChampionPress: () => void;
-  topChampionName: string;
-  bottomChampionName: string;
 }
 
 export function SideMenu({
   onReset,
-  onTopChampionPress,
-  onBottomChampionPress,
-  topChampionName,
-  bottomChampionName,
 }: SideMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [slideAnim] = useState(new Animated.Value(MENU_WIDTH));
@@ -45,18 +35,6 @@ export function SideMenu({
   const handleReset = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onReset();
-  };
-
-  const handleTopChampion = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onTopChampionPress();
-    toggleMenu();
-  };
-
-  const handleBottomChampion = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onBottomChampionPress();
-    toggleMenu();
   };
 
   return (
@@ -80,32 +58,6 @@ export function SideMenu({
         <View style={styles.menuContent}>
           <Text style={styles.menuTitle}>menu</Text>
 
-          {/* Top player champion */}
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>player 1 (top)</Text>
-            <TouchableOpacity
-              style={styles.menuButton}
-              onPress={handleTopChampion}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.menuButtonText}>{topChampionName}</Text>
-              <Text style={styles.menuButtonArrow}>→</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Bottom player champion */}
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>player 2 (bottom)</Text>
-            <TouchableOpacity
-              style={styles.menuButton}
-              onPress={handleBottomChampion}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.menuButtonText}>{bottomChampionName}</Text>
-              <Text style={styles.menuButtonArrow}>→</Text>
-            </TouchableOpacity>
-          </View>
-
           {/* Reset button */}
           <View style={styles.section}>
             <TouchableOpacity
@@ -116,6 +68,11 @@ export function SideMenu({
               <Text style={styles.resetButtonText}>↻ reset scores</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Hint text */}
+          <Text style={styles.hintText}>
+            tap score to change champion
+          </Text>
         </View>
       </Animated.View>
 
@@ -181,33 +138,6 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
-  sectionLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(0, 0, 0, 0.5)',
-    marginBottom: 8,
-    textTransform: 'lowercase',
-  },
-  menuButton: {
-    backgroundColor: '#C8F56A',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#000',
-  },
-  menuButtonText: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  menuButtonArrow: {
-    color: '#000',
-    fontSize: 16,
-  },
   resetButton: {
     backgroundColor: '#FF8FAB',
     paddingVertical: 16,
@@ -230,5 +160,12 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     zIndex: 98,
+  },
+  hintText: {
+    fontSize: 12,
+    color: 'rgba(0, 0, 0, 0.4)',
+    textAlign: 'center',
+    marginTop: 20,
+    textTransform: 'lowercase',
   },
 });
