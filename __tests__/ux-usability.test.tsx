@@ -139,11 +139,10 @@ describe('UX: Champion Picker Usability', () => {
     });
   });
 
-  test('displays title and subtitle', () => {
+  test('displays title', () => {
     render(<ChampionPicker {...mockProps} />);
 
-    expect(screen.getByText('Choose Champion')).toBeTruthy();
-    expect(screen.getByText('Tap to select your background')).toBeTruthy();
+    expect(screen.getByText('pick your champion')).toBeTruthy();
   });
 
   test('selecting a champion calls onSelect and closes picker', () => {
@@ -159,7 +158,7 @@ describe('UX: Champion Picker Usability', () => {
   test('cancel button closes the picker', () => {
     render(<ChampionPicker {...mockProps} />);
 
-    const cancelButton = screen.getByText('Cancel');
+    const cancelButton = screen.getByText('cancel');
     fireEvent.press(cancelButton);
 
     expect(mockProps.onClose).toHaveBeenCalled();
@@ -168,7 +167,7 @@ describe('UX: Champion Picker Usability', () => {
   test('modal is not rendered when not visible', () => {
     render(<ChampionPicker {...mockProps} visible={false} />);
 
-    expect(screen.queryByText('Choose Champion')).toBeNull();
+    expect(screen.queryByText('pick your champion')).toBeNull();
   });
 
   test('shows checkmark on selected champion', () => {
