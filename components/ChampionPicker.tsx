@@ -7,6 +7,7 @@ import {
   Modal,
   ScrollView,
   Dimensions,
+  Image,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { CHAMPIONS, Champion } from '../constants/champions';
@@ -71,6 +72,13 @@ export function ChampionPicker({
                       isSelected && styles.selected,
                     ]}
                   >
+                    {champion.faceImage && (
+                      <Image
+                        source={champion.faceImage}
+                        style={styles.championImage}
+                        resizeMode="cover"
+                      />
+                    )}
                     <Text style={styles.championName}>{champion.name}</Text>
                     <View style={styles.titlePill}>
                       <Text style={styles.championTitle}>{champion.title}</Text>
@@ -141,6 +149,15 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: '#000',
     minHeight: 100,
+    overflow: 'hidden',
+  },
+  championImage: {
+    position: 'absolute',
+    width: CARD_WIDTH * 1.4,
+    height: CARD_WIDTH * 1.4,
+    top: -CARD_WIDTH * 0.2,
+    left: -CARD_WIDTH * 0.2,
+    borderRadius: 20,
   },
   selected: {
     borderWidth: 4,
@@ -151,6 +168,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#fff',
     marginBottom: 8,
+    textShadowColor: '#000',
+    textShadowOffset: { width: 1, height: -15 },
+    textShadowRadius: 15,
   },
   titlePill: {
     backgroundColor: '#000',

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Dimensions,
+  Image,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { CHAMPIONS, Champion } from '../constants/champions';
@@ -68,14 +69,25 @@ export function InlineChampionPicker({
                     isSelected && styles.selected,
                   ]}
                 >
+                  {champion.faceImage && (
+                    <Image
+                      source={champion.faceImage}
+                      style={styles.championImage}
+                      resizeMode="cover"
+                    />
+                  )}
                   {/* Top text - readable from bottom of phone */}
-                  <Text style={[styles.championName, styles.topText]} numberOfLines={1}>
-                    {champion.name}
-                  </Text>
+                  <View style={[styles.namePill, styles.topText]}>
+                    <Text style={styles.championName} numberOfLines={1}>
+                      {champion.name}
+                    </Text>
+                  </View>
                   {/* Bottom text - readable from top of phone (flipped) */}
-                  <Text style={[styles.championName, styles.bottomText]} numberOfLines={1}>
-                    {champion.name}
-                  </Text>
+                  <View style={styles.namePill}>
+                    <Text style={styles.championName} numberOfLines={1}>
+                      {champion.name}
+                    </Text>
+                  </View>
                   {isSelected && (
                     <View style={styles.checkmark}>
                       <Text style={styles.checkmarkText}>✓</Text>
@@ -155,24 +167,34 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     padding: 6,
     justifyContent: 'space-between',
+    overflow: 'hidden',
+  },
+  championImage: {
+    position: 'absolute',
+    width: CARD_SIZE * 1.4,
+    height: CARD_SIZE * 1.4,
+    top: -CARD_SIZE * 0.2,
+    left: -CARD_SIZE * 0.2,
+    borderRadius: 14,
   },
   selected: {
     borderWidth: 4,
+  },
+  namePill: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'center',
   },
   championName: {
     fontSize: 10,
     fontWeight: '800',
     color: '#fff',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
     textAlign: 'center',
   },
   topText: {
     transform: [{ rotate: '180deg' }],
-  },
-  bottomText: {
-    // Normal orientation
   },
   checkmark: {
     position: 'absolute',
