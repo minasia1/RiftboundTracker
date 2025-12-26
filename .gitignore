@@ -42,3 +42,8 @@ yarn-error.*
 
 # plans
 APP_STORE_PLAN.md
+
+# Environment variables
+.env
+.env.local
+.env.*.local

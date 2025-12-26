@@ -9,7 +9,9 @@ import {
   Image,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { CHAMPIONS, Champion } from '../constants/champions';
+import { CHAMPIONS, Champion, FREE_CHAMPION } from '../constants/champions';
+import { usePurchase } from '../hooks/usePurchase';
+import { LockIcon } from './LockIcon';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE = (width - 48) / 4; // 4 cards per row with gaps
@@ -25,16 +27,25 @@ export function InlineChampionPicker({
   onClose,
   currentChampion,
 }: InlineChampionPickerProps) {
+  const { isPro } = usePurchase();
+
   const handleSelect = (champion: Champion) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onSelect(champion);
-    onClose();
+    // Only close if champion is not premium or user is pro
+    // Otherwise, parent component will show upgrade modal
+    if (!champion.isPremium || isPro) {
+      onClose();
+    }
   };
 
   const handleClose = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onClose();
   };
+
+  // Include free champion and all premium champions
+  const allChampions = [FREE_CHAMPION, ...CHAMPIONS];
 
   return (
     <View style={styles.container}>
@@ -54,8 +65,9 @@ export function InlineChampionPicker({
           contentContainerStyle={styles.grid}
           showsVerticalScrollIndicator={false}
         >
-          {CHAMPIONS.map((champion) => {
+          {allChampions.map((champion) => {
             const isSelected = currentChampion.id === champion.id;
+            const isLocked = champion.isPremium && !isPro;
             return (
               <TouchableOpacity
                 key={champion.id}
@@ -67,12 +79,16 @@ export function InlineChampionPicker({
                     styles.championCard,
                     { backgroundColor: champion.color },
                     isSelected && styles.selected,
+                    isLocked && styles.lockedCard,
                   ]}
                 >
                   {champion.faceImage && (
                     <Image
                       source={champion.faceImage}
-                      style={styles.championImage}
+                      style={[
+                        styles.championImage,
+                        isLocked && styles.lockedImage,
+                      ]}
                       resizeMode="cover"
                     />
                   )}
@@ -88,9 +104,14 @@ export function InlineChampionPicker({
                       {champion.name}
                     </Text>
                   </View>
-                  {isSelected && (
+                  {isSelected && !isLocked && (
                     <View style={styles.checkmark}>
                       <Text style={styles.checkmarkText}>✓</Text>
+                    </View>
+                  )}
+                  {isLocked && (
+                    <View style={styles.lockOverlay}>
+                      <LockIcon size={32} />
                     </View>
                   )}
                 </View>
@@ -213,5 +234,22 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  lockedCard: {
+    opacity: 0.7,
+  },
+  lockedImage: {
+    opacity: 0.3,
+  },
+  lockOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: 11,
   },
 });

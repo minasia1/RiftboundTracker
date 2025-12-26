@@ -250,4 +250,5 @@ export function InlineChampionPicker({ ... }) {
 3. "Restore Purchases" placement - SideMenu only or also in paywall?
 4. Trial prompt action - navigate to full paywall or inline purchase UI?
 5. Premium champion selection persistence after dismissing trial - remember it if they upgrade later?
-6. "Upgrade to Pro" button - always in SideMenu or only when !isPro?
+6. "Upgrade to Pro" button - always in SideMenu or only when !isPro? 
+Answer: only when !isPro.
